@@ -1,0 +1,93 @@
+#ifndef LIBDC_ERROR_CHECK_H
+#define LIBDC_ERROR_CHECK_H
+
+
+#include "error.h"
+
+
+#define DC_CHECK_NOT_NULL(err, ptr) dc_check_not_null((err), (ptr))
+#define DC_CHECK_NULL(err, ptr) dc_check_null((err), (ptr))
+#define DC_CHECK_GREATER_THAN(err, a, b) dc_check_greater_than((err), (a), (b))
+#define DC_CHECK_LESS_THAN(err, a, b) dc_check_less_than((err), (a), b)
+#define DC_CHECK_EQUALS(err, a, b)  _Generic((err), (a, b), \
+      char *: dc_check_equals_string,                       \
+      default: dc_check_equals_int                          \
+    )(a, b)
+#define DC_CHECK_NOT_EQUALS(err, a, b)  _Generic((err), (a, b), \
+      char *: dc_check_not_equals_string,                       \
+      default: dc_check_not_equals_int                          \
+    )(a, b)
+
+
+/**
+ *
+ * @param err
+ * @param ptr
+ * @return
+ */
+bool dc_check_not_null(struct dc_error *err, const void *ptr);
+
+/**
+ *
+ * @param err
+ * @param ptr
+ * @return
+ */
+bool dc_check_null(struct dc_error *err, const void *ptr);
+
+/**
+ *
+ * @param err
+ * @param a
+ * @param b
+ * @return
+ */
+bool dc_check_greater_than_int(struct dc_error *err, int a, int b);
+
+/**
+ *
+ * @param err
+ * @param a
+ * @param b
+ * @return
+ */
+bool dc_check_less_than_int(struct dc_error *err, int a, int b);
+
+/**
+ *
+ * @param err
+ * @param a
+ * @param b
+ * @return
+ */
+bool dc_check_equals_int(struct dc_error *err, int a, int b);
+
+/**
+ *
+ * @param err
+ * @param a
+ * @param b
+ * @return
+ */
+bool dc_check_equals_string(struct dc_error *err, const char *a, const char *b);
+
+/**
+ *
+ * @param err
+ * @param a
+ * @param b
+ * @return
+ */
+bool dc_check_not_equals_int(struct dc_error *err, int a, int b);
+
+/**
+ *
+ * @param err
+ * @param a
+ * @param b
+ * @return
+ */
+bool dc_check_not_equals_string(struct dc_error *err, const char *a, const char *b);
+
+
+#endif // LIBDC_ERROR_CHECK_H
