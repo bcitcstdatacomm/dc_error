@@ -33,6 +33,7 @@ struct dc_error
     const char *function_name;    /**< the function name that the error happened in */
     size_t line_number;           /**< the line number that the error happened on */
     dc_error_type type;           /**< type type of error */
+    void (*reporter)(const struct dc_error *err);
 
     union
     {
@@ -46,13 +47,20 @@ struct dc_error
  *
  * @param err
  */
-void dc_error_init(struct dc_error *err);
+void dc_error_init(struct dc_error *err, void (*reporter)(const struct dc_error *err));
 
 /**
  *
  * @param err
  */
 void dc_error_reset(struct dc_error *err);
+
+/**
+ *
+ * @param env
+ * @param err
+ */
+void dc_error_default_error_reporter(const struct dc_error *err);
 
 /**
  *

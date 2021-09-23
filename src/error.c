@@ -1,4 +1,5 @@
 #include "error.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,9 +12,10 @@ static void setup_error(struct dc_error *err,
                         const char *msg);
 
 
-void dc_error_init(struct dc_error *err)
+void dc_error_init(struct dc_error *err, void (*reporter)(const struct dc_error *err))
 {
     memset(err, 0, sizeof(struct dc_error));
+    err->reporter = reporter;
 }
 
 void dc_error_reset(struct dc_error *err)
@@ -24,9 +26,32 @@ void dc_error_reset(struct dc_error *err)
         err->message = NULL;
     }
 
-    dc_error_init(err);
+    dc_error_init(err, err->reporter);
 }
 
+void dc_error_default_error_reporter(const struct dc_error *err)
+{
+    if(err->type == DC_ERROR_ERRNO)
+    {
+        fprintf(stderr,
+                "ERROR: %s : %s : @ %zu : %d\n",
+                err->file_name,
+                err->function_name,
+                err->line_number,
+                err->errno_code);
+    }
+    else
+    {
+        fprintf(stderr,
+                "ERROR: %s : %s : @ %zu : %d\n",
+                err->file_name,
+                err->function_name,
+                err->line_number,
+                err->err_code);
+    }
+
+    fprintf(stderr, "ERROR: %s\n", err->message);
+}
 static void setup_error(struct dc_error *err,
                         dc_error_type type,
                         const char *file_name,
@@ -61,6 +86,11 @@ void dc_error_check(struct dc_error *err,
     msg = "failed check";
     setup_error(err, DC_ERROR_CHECK, file_name, function_name, line_number, msg);
     err->errno_code = -1;
+
+    if(err->reporter)
+    {
+        err->reporter(err);
+    }
 }
 
 void dc_error_errno(struct dc_error *err,
@@ -74,6 +104,11 @@ void dc_error_errno(struct dc_error *err,
     msg = strerror(err_code);
     setup_error(err, DC_ERROR_ERRNO, file_name, function_name, line_number, msg);
     err->errno_code = err_code;
+
+    if(err->reporter)
+    {
+        err->reporter(err);
+    }
 }
 
 void dc_error_system(struct dc_error *err,
@@ -85,6 +120,11 @@ void dc_error_system(struct dc_error *err,
 {
     setup_error(err, DC_ERROR_SYSTEM, file_name, function_name, line_number, msg);
     err->err_code = err_code;
+
+    if(err->reporter)
+    {
+        err->reporter(err);
+    }
 }
 
 void dc_error_user(struct dc_error *err,
@@ -96,6 +136,11 @@ void dc_error_user(struct dc_error *err,
 {
     setup_error(err, DC_ERROR_USER, file_name, function_name, line_number, msg);
     err->err_code = err_code;
+
+    if(err->reporter)
+    {
+        err->reporter(err);
+    }
 }
 
 inline bool dc_error_has_error(const struct dc_error *err)
