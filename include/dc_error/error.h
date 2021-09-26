@@ -43,11 +43,13 @@ struct dc_error
 };
 
 
+typedef void (*dc_error_reporter)(const struct dc_error *err);
+
 /**
  *
  * @param err
  */
-void dc_error_init(struct dc_error *err, void (*reporter)(const struct dc_error *err));
+void dc_error_init(struct dc_error *err, dc_error_reporter reporter);
 
 /**
  *
