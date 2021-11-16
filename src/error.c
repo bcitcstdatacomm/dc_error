@@ -52,6 +52,7 @@ void dc_error_default_error_reporter(const struct dc_error *err)
 
     fprintf(stderr, "ERROR: %s\n", err->message);
 }
+
 static void setup_error(struct dc_error *err,
                         dc_error_type type,
                         const char *file_name,
@@ -157,4 +158,3 @@ inline bool dc_error_is_errno(const struct dc_error *err, errno_t code)
 {
     return (err->type == DC_ERROR_ERRNO) && (err->errno_code == code);
 }
-

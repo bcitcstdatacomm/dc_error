@@ -132,7 +132,6 @@ bool dc_error_has_no_error(const struct dc_error *err);
  */
 bool dc_error_is_errno(const struct dc_error *err, errno_t code);
 
-
 #define DC_ERROR_RAISE_CHECK(err)                                              \
   dc_error_check((err), __FILE__, __func__, __LINE__)
 #define DC_ERROR_RAISE_ERRNO(err, code)                                        \
