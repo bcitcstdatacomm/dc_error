@@ -34,23 +34,23 @@ void dc_error_default_error_reporter(const struct dc_error *err)
     if(err->type == DC_ERROR_ERRNO)
     {
         fprintf(stderr,
-                "ERROR: %s : %s : @ %zu : %d\n",
+                "ERROR: %s : %s : @ %zu : %d : %s\n",
                 err->file_name,
                 err->function_name,
                 err->line_number,
-                err->errno_code);
+                err->errno_code,
+                err->message);
     }
     else
     {
         fprintf(stderr,
-                "ERROR: %s : %s : @ %zu : %d\n",
+                "ERROR: %s : %s : @ %zu : %d : %s\n",
                 err->file_name,
                 err->function_name,
                 err->line_number,
-                err->err_code);
+                err->err_code,
+                err->message);
     }
-
-    fprintf(stderr, "ERROR: %s\n", err->message);
 }
 
 static void setup_error(struct dc_error *err,
