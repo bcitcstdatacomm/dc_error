@@ -1,11 +1,25 @@
 #ifndef LIBDC_ERROR_ERROR_H
 #define LIBDC_ERROR_ERROR_H
 
+/*
+ * Copyright 2021-2022 D'Arcy Smith.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
-
 
 #ifndef __STDC_LIB_EXT1__
 typedef int errno_t;
@@ -16,32 +30,33 @@ typedef int errno_t;
  */
 typedef enum
 {
-    DC_ERROR_NONE = 0, /**< There is no error */
-    DC_ERROR_CHECK,    /**< The error is due to a failed check */
-    DC_ERROR_ERRNO,    /**< The error is due to errno being set */
-    DC_ERROR_SYSTEM,   /**< The error is from a library call that doesn't set errno */
-    DC_ERROR_USER,     /**< The error is from a non-standard function */
+  DC_ERROR_NONE = 0, /**< There is no error */
+  DC_ERROR_CHECK,    /**< The error is due to a failed check */
+  DC_ERROR_ERRNO,    /**< The error is due to errno being set */
+  DC_ERROR_SYSTEM, /**< The error is from a library call that doesn't set errno
+                    */
+  DC_ERROR_USER,   /**< The error is from a non-standard function */
 } dc_error_type;
 
 /**
  *
  */
-struct dc_error
-{
-    char *message;                /**< the message for the error, dynamically allocated */
-    const char *file_name;        /**< the file name that the error happened in */
-    const char *function_name;    /**< the function name that the error happened in */
-    size_t line_number;           /**< the line number that the error happened on */
-    dc_error_type type;           /**< type type of error */
-    void (*reporter)(const struct dc_error *err);
+struct dc_error {
+  char *message; /**< the message for the error, dynamically allocated */
+  const char *file_name; /**< the file name that the error happened in */
+  const char
+      *function_name; /**< the function name that the error happened in */
+  size_t line_number; /**< the line number that the error happened on */
+  dc_error_type type; /**< type type of error */
+  void (*reporter)(const struct dc_error *err);
 
-    union
-    {
-        errno_t errno_code; /**< the value of errno, if the type is DC_ERROR_ERRNO */
-        int err_code;       /**< type value of the error, if the type is not DC_ERROR_ERRNO */
-    };
+  union {
+    errno_t
+        errno_code; /**< the value of errno, if the type is DC_ERROR_ERRNO */
+    int err_code;   /**< type value of the error, if the type is not
+                       DC_ERROR_ERRNO */
+  };
 };
-
 
 typedef void (*dc_error_reporter)(const struct dc_error *err);
 
@@ -140,6 +155,5 @@ bool dc_error_is_errno(const struct dc_error *err, errno_t code);
   dc_error_system((err), __FILE__, __func__, __LINE__, (msg), (code))
 #define DC_ERROR_RAISE_USER(err, msg, code)                                    \
   dc_error_user((err), __FILE__, __func__, __LINE__, (msg), (code))
-
 
 #endif // LIBDC_ERROR_ERROR_H

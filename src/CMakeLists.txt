@@ -23,8 +23,8 @@ set_target_properties(dc_error PROPERTIES
         VERSION ${PROJECT_VERSION}
         SOVERSION ${PROJECT_VERSION_MAJOR})
 
-# All users of this library will need at least C11
-target_compile_features(dc_error PUBLIC c_std_11)
+# All users of this library will need at least C17
+target_compile_features(dc_error PUBLIC c_std_17)
 target_compile_options(dc_error PRIVATE -g -fPIC)
 target_compile_options(dc_error PRIVATE -fstack-protector-all -ftrapv)
 target_compile_options(dc_error PRIVATE -Wpedantic -Wall -Wextra)
