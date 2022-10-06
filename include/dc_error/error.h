@@ -38,9 +38,6 @@ typedef enum
   DC_ERROR_USER,   /**< The error is from a non-standard function */
 } dc_error_type;
 
-/**
- *
- */
 struct dc_error {
   char *message; /**< the message for the error, dynamically allocated */
   const char *file_name; /**< the file name that the error happened in */
@@ -60,91 +57,31 @@ struct dc_error {
 
 typedef void (*dc_error_reporter)(const struct dc_error *err);
 
-/**
- *
- * @param err
- */
 void dc_error_init(struct dc_error *err, dc_error_reporter reporter);
 
-/**
- *
- * @param err
- */
 void dc_error_reset(struct dc_error *err);
 
-/**
- *
- * @param env
- * @param err
- */
 void dc_error_default_error_reporter(const struct dc_error *err);
 
-/**
- *
- * @param err
- * @param file_name
- * @param function_name
- * @param line_number
- */
 void dc_error_check(struct dc_error *err, const char *file_name,
                     const char *function_name, size_t line_number);
 
-/**
- *
- * @param err
- * @param file_name
- * @param function_name
- * @param line_number
- * @param err_code
- */
 void dc_error_errno(struct dc_error *err, const char *file_name,
                     const char *function_name, size_t line_number,
                     errno_t err_code);
 
-/**
- *
- * @param err
- * @param file_name
- * @param function_name
- * @param line_number
- * @param err_code
- */
 void dc_error_system(struct dc_error *err, const char *file_name,
                      const char *function_name, size_t line_number,
                      const char *msg, int err_code);
 
-/**
- *
- * @param err
- * @param file_name
- * @param function_name
- * @param line_number
- * @param err_code
- */
 void dc_error_user(struct dc_error *err, const char *file_name,
                    const char *function_name, size_t line_number,
                    const char *msg, int err_code);
 
-/**
- *
- * @param err
- * @return
- */
 bool dc_error_has_error(const struct dc_error *err);
 
-/**
- *
- * @param err
- * @return
- */
 bool dc_error_has_no_error(const struct dc_error *err);
 
-/**
- *
- * @param err
- * @param code
- * @return
- */
 bool dc_error_is_errno(const struct dc_error *err, errno_t code);
 
 #define DC_ERROR_RAISE_CHECK(err)                                              \

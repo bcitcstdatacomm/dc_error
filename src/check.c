@@ -15,8 +15,8 @@
  */
 
 
-#include "check.h"
-#include "error.h"
+#include "dc_error/check.h"
+#include "dc_error/error.h"
 #include <string.h>
 
 bool dc_check_not_null(struct dc_error *err, const void *ptr)

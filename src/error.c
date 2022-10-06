@@ -15,7 +15,7 @@
  */
 
 
-#include "error.h"
+#include "dc_error/error.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,11 +43,11 @@ void dc_error_default_error_reporter(const struct dc_error *err)
 {
     if(err->type == DC_ERROR_ERRNO)
     {
-        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number, err->errno_code, err->message);
+        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number, err->errno_code, err->message);     // NOLINT(cert-err33-c)
     }
     else
     {
-        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number, err->err_code, err->message);
+        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number, err->err_code, err->message);       // NOLINT(cert-err33-c)
     }
 }
 
@@ -88,9 +88,10 @@ void dc_error_errno(struct dc_error *err, const char *file_name, const char *fun
 {
     char *msg;
 
-    msg = strerror(err_code);
+    msg = strerror(err_code);   // NOLINT(concurrency-mt-unsafe)
+    msg = strdup(msg);
     setup_error(err, DC_ERROR_ERRNO, file_name, function_name, line_number, msg);
-    err->errno_code = err_code;
+    err->errno_code = err_code; // NOLINT(clang-analyzer-unix.Malloc)
 
     if(err->reporter)
     {
