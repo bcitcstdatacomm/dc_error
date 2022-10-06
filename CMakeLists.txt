@@ -150,5 +150,5 @@ add_dependencies(dc_error doxygen)
 
 # Testing only available if this is the main app
 #if ((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME) AND BUILD_TESTING AND LIBCGREEN)
-    add_subdirectory(tests)
+#    add_subdirectory(tests)
 #endif ()
