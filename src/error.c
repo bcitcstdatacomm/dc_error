@@ -20,12 +20,48 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void setup_error(struct dc_error *err, dc_error_type type, const char *file_name, const char *function_name, size_t line_number, const char *msg);
+struct dc_error
+{
+    char *message;
+    const char *file_name;
+    const char *function_name;
+    size_t line_number;
+    dc_error_type type;
 
-void        dc_error_init(struct dc_error *err, void (*reporter)(const struct dc_error *err))
+    void (*reporter)(const struct dc_error *err);
+
+    union
+    {
+        errno_t errno_code;
+        int err_code;
+    };
+};
+
+static void setup_error(struct dc_error *err, dc_error_type type, const char *file_name, const char *function_name,
+                        size_t line_number, const char *msg);
+
+struct dc_error *dc_error_create(bool report)
+{
+    struct dc_error *err;
+
+    err = malloc(sizeof(struct dc_error));
+
+    if(err != NULL)
+    {
+        dc_error_init(err, report);
+    }
+
+    return err;
+}
+
+void dc_error_init(struct dc_error *err, bool report)
 {
     memset(err, 0, sizeof(struct dc_error));
-    err->reporter = reporter;
+
+    if(report)
+    {
+        err->reporter = dc_error_default_error_reporter;
+    }
 }
 
 void dc_error_reset(struct dc_error *err)
@@ -39,19 +75,41 @@ void dc_error_reset(struct dc_error *err)
     dc_error_init(err, err->reporter);
 }
 
+bool dc_error_is_reporting(struct dc_error *err)
+{
+    return err->reporter != NULL;
+}
+
+void dc_error_set_reporting(struct dc_error *err, bool on)
+{
+    if(on)
+    {
+        err->reporter = dc_error_default_error_reporter;
+    }
+    else
+    {
+        err->reporter = NULL;
+    }
+}
+
 void dc_error_default_error_reporter(const struct dc_error *err)
 {
     if(err->type == DC_ERROR_ERRNO)
     {
-        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number, err->errno_code, err->message);     // NOLINT(cert-err33-c)
+        // NOLINTNEXTLINE(cert-err33-c)
+        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number,
+                err->errno_code, err->message);
     }
     else
     {
-        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number, err->err_code, err->message);       // NOLINT(cert-err33-c)
+        // NOLINTNEXTLINE(cert-err33-c)
+        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number,
+                err->err_code, err->message);
     }
 }
 
-static void setup_error(struct dc_error *err, dc_error_type type, const char *file_name, const char *function_name, size_t line_number, const char *msg)
+static void setup_error(struct dc_error *err, dc_error_type type, const char *file_name, const char *function_name,
+                        size_t line_number, const char *msg)
 {
     char *saved_msg;
 
@@ -62,11 +120,11 @@ static void setup_error(struct dc_error *err, dc_error_type type, const char *fi
         strcpy(saved_msg, msg);
     }
 
-    err->type          = type;
-    err->file_name     = file_name;
+    err->type = type;
+    err->file_name = file_name;
     err->function_name = function_name;
-    err->line_number   = line_number;
-    err->message       = saved_msg;
+    err->line_number = line_number;
+    err->message = saved_msg;
 }
 
 void dc_error_check(struct dc_error *err, const char *file_name, const char *function_name, size_t line_number)
@@ -84,7 +142,8 @@ void dc_error_check(struct dc_error *err, const char *file_name, const char *fun
     }
 }
 
-void dc_error_errno(struct dc_error *err, const char *file_name, const char *function_name, size_t line_number, errno_t err_code)
+void dc_error_errno(struct dc_error *err, const char *file_name, const char *function_name, size_t line_number,
+                    errno_t err_code)
 {
     char *msg;
 
@@ -99,7 +158,8 @@ void dc_error_errno(struct dc_error *err, const char *file_name, const char *fun
     }
 }
 
-void dc_error_system(struct dc_error *err, const char *file_name, const char *function_name, size_t line_number, const char *msg, int err_code)
+void dc_error_system(struct dc_error *err, const char *file_name, const char *function_name, size_t line_number,
+                     const char *msg, int err_code)
 {
     setup_error(err, DC_ERROR_SYSTEM, file_name, function_name, line_number, msg);
     err->err_code = err_code;
@@ -110,7 +170,8 @@ void dc_error_system(struct dc_error *err, const char *file_name, const char *fu
     }
 }
 
-void dc_error_user(struct dc_error *err, const char *file_name, const char *function_name, size_t line_number, const char *msg, int err_code)
+void dc_error_user(struct dc_error *err, const char *file_name, const char *function_name, size_t line_number,
+                   const char *msg, int err_code)
 {
     setup_error(err, DC_ERROR_USER, file_name, function_name, line_number, msg);
     err->err_code = err_code;
