@@ -64,6 +64,8 @@ bool dc_error_is_reporting(struct dc_error *err);
  */
 void dc_error_set_reporting(struct dc_error *err, bool on);
 
+const char *dc_error_get_message(const struct dc_error *err);
+
 /**
  *
  * @param err

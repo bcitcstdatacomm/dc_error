@@ -95,6 +95,27 @@ void dc_error_set_reporting(struct dc_error *err, bool on)
     }
 }
 
+const char *dc_error_get_message(const struct dc_error *err)
+{
+    const char *message;
+
+    if(err->message)
+    {
+        message = err->message;
+    }
+    else if(err->const_message)
+    {
+        message = err->const_message;
+    }
+    else
+    {
+        message = "*there is no error message set*";
+    }
+
+    return message;
+}
+
+
 void dc_error_default_error_reporter(const struct dc_error *err)
 {
     const char *msg;
