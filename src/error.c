@@ -22,6 +22,7 @@
 
 struct dc_error
 {
+    const char *const_message;
     char *message;
     const char *file_name;
     const char *function_name;
@@ -39,6 +40,8 @@ struct dc_error
 
 static void setup_error(struct dc_error *err, dc_error_type type, const char *file_name, const char *function_name,
                         size_t line_number, const char *msg);
+static void setup_error_no_dup(struct dc_error *err, dc_error_type type, const char *file_name, const char *function_name,
+                               size_t line_number, const char *msg);
 
 struct dc_error *dc_error_create(bool report)
 {
@@ -46,7 +49,7 @@ struct dc_error *dc_error_create(bool report)
 
     err = malloc(sizeof(struct dc_error));
 
-    if(err != NULL)
+    if (err != NULL)
     {
         dc_error_init(err, report);
     }
@@ -58,7 +61,7 @@ void dc_error_init(struct dc_error *err, bool report)
 {
     memset(err, 0, sizeof(struct dc_error));
 
-    if(report)
+    if (report)
     {
         err->reporter = dc_error_default_error_reporter;
     }
@@ -66,9 +69,10 @@ void dc_error_init(struct dc_error *err, bool report)
 
 void dc_error_reset(struct dc_error *err)
 {
-    if(err->message)
+    if (err->message)
     {
         free(err->message);
+        err->const_message = NULL;
         err->message = NULL;
     }
 
@@ -82,11 +86,10 @@ bool dc_error_is_reporting(struct dc_error *err)
 
 void dc_error_set_reporting(struct dc_error *err, bool on)
 {
-    if(on)
+    if (on)
     {
         err->reporter = dc_error_default_error_reporter;
-    }
-    else
+    } else
     {
         err->reporter = NULL;
     }
@@ -94,17 +97,27 @@ void dc_error_set_reporting(struct dc_error *err, bool on)
 
 void dc_error_default_error_reporter(const struct dc_error *err)
 {
-    if(err->type == DC_ERROR_ERRNO)
+    const char *msg;
+
+    if(err->const_message)
     {
-        // NOLINTNEXTLINE(cert-err33-c)
-        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number,
-                err->errno_code, err->message);
+        msg = err->const_message;
     }
     else
     {
+        msg = err->message;
+    }
+
+    if (err->type == DC_ERROR_ERRNO)
+    {
         // NOLINTNEXTLINE(cert-err33-c)
         fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number,
-                err->err_code, err->message);
+                err->errno_code, msg);
+    } else
+    {
+        // NOLINTNEXTLINE(cert-err33-c)
+        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number,
+                err->err_code, msg);
     }
 }
 
@@ -113,18 +126,33 @@ static void setup_error(struct dc_error *err, dc_error_type type, const char *fi
 {
     char *saved_msg;
 
-    saved_msg = malloc(strlen(msg) + 1);
+    errno = 0;
+    saved_msg = strdup(msg);
 
-    if(saved_msg)
+    if(saved_msg == NULL)
     {
-        strcpy(saved_msg, msg);
+        setup_error_no_dup(err, type, file_name, function_name, line_number, saved_msg);
     }
+    else
+    {
+        err->type = type;
+        err->file_name = file_name;
+        err->function_name = function_name;
+        err->line_number = line_number;
+        err->const_message = NULL;
+        err->message = saved_msg;
+    }
+}
 
+static void setup_error_no_dup(struct dc_error *err, dc_error_type type, const char *file_name, const char *function_name,
+                               size_t line_number, const char *msg)
+{
     err->type = type;
     err->file_name = file_name;
     err->function_name = function_name;
     err->line_number = line_number;
-    err->message = saved_msg;
+    err->message = NULL;
+    err->const_message = msg;
 }
 
 void dc_error_check(struct dc_error *err, const char *file_name, const char *function_name, size_t line_number)
@@ -147,10 +175,34 @@ void dc_error_errno(struct dc_error *err, const char *file_name, const char *fun
 {
     char *msg;
 
+    errno = 0;
     msg = strerror(err_code);   // NOLINT(concurrency-mt-unsafe)
-    msg = strdup(msg);
-    setup_error(err, DC_ERROR_ERRNO, file_name, function_name, line_number, msg);
-    err->errno_code = err_code; // NOLINT(clang-analyzer-unix.Malloc)
+
+    if(msg == NULL)
+    {
+        const char *static_msg;
+
+        if(errno == EINVAL)
+        {
+            static_msg = "bad errno";
+        }
+        else if(errno == ERANGE)
+        {
+            static_msg = "out of memory";
+        }
+        else
+        {
+            static_msg = "unknown error";
+        }
+
+        setup_error_no_dup(err, DC_ERROR_ERRNO, __FILE__, __func__, __LINE__, static_msg);
+        err->errno_code = errno;
+    }
+    else
+    {
+        setup_error(err, DC_ERROR_ERRNO, file_name, function_name, line_number, msg);
+        err->errno_code = err_code;
+    }
 
     if(err->reporter)
     {
@@ -164,7 +216,7 @@ void dc_error_system(struct dc_error *err, const char *file_name, const char *fu
     setup_error(err, DC_ERROR_SYSTEM, file_name, function_name, line_number, msg);
     err->err_code = err_code;
 
-    if(err->reporter)
+    if (err->reporter)
     {
         err->reporter(err);
     }
@@ -176,7 +228,7 @@ void dc_error_user(struct dc_error *err, const char *file_name, const char *func
     setup_error(err, DC_ERROR_USER, file_name, function_name, line_number, msg);
     err->err_code = err_code;
 
-    if(err->reporter)
+    if (err->reporter)
     {
         err->reporter(err);
     }
