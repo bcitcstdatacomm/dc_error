@@ -145,11 +145,11 @@ endif ()
 
 add_library(dc_error SHARED ${SOURCE_LIST} ${HEADER_LIST})
 target_include_directories(dc_error PRIVATE include/dc_error)
+target_include_directories(dc_error PRIVATE /usr/local/include)
+target_link_directories(dc_error PRIVATE /usr/local/lib)
 
 if (NOT APPLE)
     target_include_directories(dc_error PRIVATE /usr/include)
-    target_include_directories(dc_error PRIVATE /usr/local/include)
-    target_link_directories(dc_error PRIVATE /usr/local/lib)
 endif ()
 
 set_target_properties(dc_error PROPERTIES
