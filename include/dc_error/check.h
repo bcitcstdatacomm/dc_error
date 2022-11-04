@@ -17,7 +17,14 @@
  * limitations under the License.
  */
 
+
 #include "error.h"
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 #define DC_CHECK_NOT_NULL(err, ptr) dc_check_not_null((err), (ptr))
 #define DC_CHECK_NULL(err, ptr) dc_check_null((err), (ptr))
@@ -104,5 +111,11 @@ bool dc_check_not_equals_int(struct dc_error *err, int a, int b);
  */
 bool dc_check_not_equals_string(struct dc_error *err, const char *a,
                                 const char *b);
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif // LIBDC_ERROR_CHECK_H

@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 struct dc_error
 {
     const char *const_message;

@@ -17,13 +17,21 @@
  * limitations under the License.
  */
 
+
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #ifndef __STDC_LIB_EXT1__
 typedef int errno_t;
 #endif
+
 
 /**
  * Error states.
@@ -156,5 +164,11 @@ bool dc_error_is_errno(const struct dc_error *err, errno_t code);
   dc_error_system((err), __FILE__, __func__, __LINE__, (msg), (code))
 #define DC_ERROR_RAISE_USER(err, msg, code)                                    \
   dc_error_user((err), __FILE__, __func__, __LINE__, (msg), (code))
+
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif // LIBDC_ERROR_ERROR_H
