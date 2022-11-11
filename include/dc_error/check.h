@@ -1,6 +1,7 @@
 #ifndef LIBDC_ERROR_CHECK_H
 #define LIBDC_ERROR_CHECK_H
 
+
 /*
  * Copyright 2021-2022 D'Arcy Smith.
  *
