@@ -90,7 +90,8 @@ void dc_error_set_reporting(struct dc_error *err, bool on)
     if (on)
     {
         err->reporter = dc_error_default_error_reporter;
-    } else
+    }
+    else
     {
         err->reporter = NULL;
     }
@@ -146,10 +147,12 @@ void dc_error_default_error_reporter(const struct dc_error *err)
 static void setup_error(struct dc_error *err, dc_error_type type, const char *file_name, const char *function_name,
                         size_t line_number, const char *msg)
 {
+    size_t len;
     char *saved_msg;
 
     errno = 0;
-    saved_msg = strdup(msg);
+    len = strlen(msg);
+    saved_msg = malloc(len + 1);
 
     if(saved_msg == NULL)
     {
@@ -157,6 +160,7 @@ static void setup_error(struct dc_error *err, dc_error_type type, const char *fi
     }
     else
     {
+        strcpy(saved_msg, msg);
         err->type = type;
         err->file_name = file_name;
         err->function_name = function_name;
