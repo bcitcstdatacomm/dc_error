@@ -20,4 +20,3 @@ find_library(LIBCGREEN cgreen REQUIRED)
 target_link_libraries(libdc_error_test PRIVATE ${LIBCGREEN})
 
 add_test(NAME libdc_error_test COMMAND libdc_error_test)
-
