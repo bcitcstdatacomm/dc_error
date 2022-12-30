@@ -111,7 +111,7 @@ const char *dc_error_get_message(const struct dc_error *err)
     }
     else
     {
-        message = "*there is no error message set*";
+        message = NULL;
     }
 
     return message;
@@ -273,4 +273,9 @@ inline bool dc_error_has_no_error(const struct dc_error *err)
 inline bool dc_error_is_errno(const struct dc_error *err, errno_t code)
 {
     return (err->type == DC_ERROR_ERRNO) && (err->errno_code == code);
+}
+
+inline errno_t dc_errno_get_errno(const struct dc_error *err)
+{
+    return err->errno_code;
 }
