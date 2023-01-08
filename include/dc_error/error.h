@@ -54,13 +54,6 @@ struct dc_error *dc_error_create(bool report);
 /**
  *
  * @param err
- * @param report
- */
-void dc_error_init(struct dc_error *err, bool report);
-
-/**
- *
- * @param err
  * @return
  */
 bool dc_error_is_reporting(struct dc_error *err);

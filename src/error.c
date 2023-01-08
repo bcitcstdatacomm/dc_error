@@ -39,6 +39,8 @@ struct dc_error
     };
 };
 
+
+static void dc_error_init(struct dc_error *err, void (*reporter)(const struct dc_error *err));
 static void setup_error(struct dc_error *err, dc_error_type type, const char *file_name, const char *function_name,
                         size_t line_number, const char *msg);
 static void setup_error_no_dup(struct dc_error *err, dc_error_type type, const char *file_name, const char *function_name,
@@ -50,34 +52,45 @@ struct dc_error *dc_error_create(bool report)
 
     err = malloc(sizeof(struct dc_error));
 
-    if (err != NULL)
+    if(err != NULL)
     {
-        dc_error_init(err, report);
+        void (*reporter)(const struct dc_error *err);
+
+        if(report)
+        {
+            reporter = dc_error_default_error_reporter;
+        }
+        else
+        {
+            reporter = NULL;
+        }
+
+        dc_error_init(err, reporter);
     }
 
     return err;
 }
 
-void dc_error_init(struct dc_error *err, bool report)
+static void dc_error_init(struct dc_error *err, void (*reporter)(const struct dc_error *err))
 {
     memset(err, 0, sizeof(struct dc_error));
-
-    if (report)
-    {
-        err->reporter = dc_error_default_error_reporter;
-    }
+    err->reporter = reporter;
 }
 
 void dc_error_reset(struct dc_error *err)
 {
-    if (err->message)
+    void (*reporter)(const struct dc_error *err);
+
+    reporter = err->reporter;
+
+    if(err->message)
     {
         free(err->message);
         err->const_message = NULL;
         err->message = NULL;
     }
 
-    dc_error_init(err, err->reporter);
+    dc_error_init(err, reporter);
 }
 
 bool dc_error_is_reporting(struct dc_error *err)
