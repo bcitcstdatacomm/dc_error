@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 
 struct dc_error
@@ -134,6 +135,7 @@ const char *dc_error_get_message(const struct dc_error *err)
 void dc_error_default_error_reporter(const struct dc_error *err)
 {
     const char *msg;
+    int pid;            // the compiler doesn't let pid_t be used...
 
     if(err->const_message)
     {
@@ -144,15 +146,17 @@ void dc_error_default_error_reporter(const struct dc_error *err)
         msg = err->message;
     }
 
+    pid = getpid();
+
     if (err->type == DC_ERROR_ERRNO)
     {
         // NOLINTNEXTLINE(cert-err33-c)
-        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number,
+        fprintf(stderr, "ERROR (pid=%d): %s : %s : @ %zu : %d : %s\n", pid, err->file_name, err->function_name, err->line_number,
                 err->errno_code, msg);
     } else
     {
         // NOLINTNEXTLINE(cert-err33-c)
-        fprintf(stderr, "ERROR: %s : %s : @ %zu : %d : %s\n", err->file_name, err->function_name, err->line_number,
+        fprintf(stderr, "ERROR (pid=%d): %s : %s : @ %zu : %d : %s\n", pid, err->file_name, err->function_name, err->line_number,
                 err->err_code, msg);
     }
 }
