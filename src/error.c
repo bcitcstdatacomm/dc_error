@@ -151,12 +151,12 @@ void dc_error_default_error_reporter(const struct dc_error *err)
     if (err->type == DC_ERROR_ERRNO)
     {
         // NOLINTNEXTLINE(cert-err33-c)
-        fprintf(stderr, "ERROR (pid=%d): %s : %s : @ %zu : %d : %s\n", pid, err->file_name, err->function_name, err->line_number,
+        fprintf(stderr, "ERROR (pid=%d): %s : %s : @ %zu : (errno = %d) : %s\n", pid, err->file_name, err->function_name, err->line_number,
                 err->errno_code, msg);
     } else
     {
         // NOLINTNEXTLINE(cert-err33-c)
-        fprintf(stderr, "ERROR (pid=%d): %s : %s : @ %zu : %d : %s\n", pid, err->file_name, err->function_name, err->line_number,
+        fprintf(stderr, "ERROR (pid=%d): %s : %s : @ %zu : (error code = %d) : %s\n", pid, err->file_name, err->function_name, err->line_number,
                 err->err_code, msg);
     }
 }
